@@ -5,6 +5,7 @@ import com.dd.poker.model.Hand;
 import com.dd.poker.model.HandDispatched;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -14,9 +15,9 @@ import java.util.stream.Collectors;
 import static com.dd.poker.model.HandType.*;
 
 @Service
-public class HandFactory {
+class HandFactory {
 
-    private List<Function<HandDispatched, Optional<Hand>>> handChain = List.of(
+    private List<Function<HandDispatched, Optional<Hand>>> handsChain = List.of(
             this::getRoyalFlush,
             this::getStraightFlush,
             this::getFourOfKind,
@@ -28,8 +29,8 @@ public class HandFactory {
             this::getTwoOfKind
     );
 
-    public Hand getHand(HandDispatched handDispatched) {
-        return handChain.stream().map(f -> f.apply(handDispatched)).filter(Optional::isPresent)
+    Hand getHand(HandDispatched handDispatched) {
+        return handsChain.stream().map(f -> f.apply(handDispatched)).filter(Optional::isPresent)
                 .findFirst().map(Optional::get)
                 .orElse(new Hand(HIGHCARD, String.valueOf(handDispatched.getSortedCardsValues().first())));
     }
@@ -55,19 +56,21 @@ public class HandFactory {
     }
 
     private Optional<Hand> getFourOfKind(HandDispatched handDispatched) {
-        return Optional.ofNullable(handDispatched.getFours())
-                .map(cards -> new Hand(FOUR, String.valueOf(cards.first())));
+        return handDispatched.getFours().isEmpty() ? Optional.empty() :
+                Optional.of(new Hand(FOUR, String.valueOf(handDispatched.getFours().first())));
     }
 
     private Optional<Hand> getFullHouse(HandDispatched handDispatched) {
-        return Optional.ofNullable(handDispatched).map(hd -> new Hand(FULL_HOUSE, String.join(":",
-                String.valueOf(hd.getThrees().first()) , String.valueOf(hd.getPairs().first()))));
+        SortedSet<Integer> threes = handDispatched.getThrees();
+        SortedSet<Integer> pairs = handDispatched.getPairs();
+        return threes.isEmpty() || pairs.isEmpty() ? Optional.empty() : Optional.of(new Hand(FULL_HOUSE,
+                String.join(":", List.of(String.valueOf(threes.first()), String.valueOf(pairs.first())))));
     }
 
     private Optional<Hand> getFlush(HandDispatched handDispatched) {
         return handDispatched.getSuitedCards().values().stream()
                 .filter(cards -> cards.size() >= 5).findFirst()
-                .map(cards -> new Hand(FLUSH, String.valueOf(cards.first())));
+                .map(cards -> new Hand(FLUSH, String.valueOf(cards.first().getValue())));
     }
 
     private Optional<Hand> getStraight(HandDispatched handDispatched) {
@@ -77,18 +80,18 @@ public class HandFactory {
     }
 
     private Optional<Hand> getThreeOfKind(HandDispatched handDispatched) {
-        return Optional.ofNullable(handDispatched.getThrees())
-                .map(cards -> new Hand(THREE, String.valueOf(cards.first())));
+        return handDispatched.getThrees().isEmpty() ? Optional.empty() :
+                Optional.of(new Hand(THREE, String.valueOf(handDispatched.getThrees().first())));
     }
 
     private Optional<Hand> getTwoPairs(HandDispatched handDispatched) {
         SortedSet<Integer> pairs = handDispatched.getPairs();
-        return pairs.size() >= 2 ? Optional.of(new Hand(TWO_PAIRS, pairs.subSet(0,1).stream().map(String::valueOf)
+        return pairs.size() >= 2 ? Optional.of(new Hand(TWO_PAIRS, new ArrayList<>(pairs).subList(0,2).stream().map(String::valueOf)
                         .collect(Collectors.joining(":")))) : Optional.empty();
     }
 
     private Optional<Hand> getTwoOfKind(HandDispatched handDispatched) {
-        return Optional.ofNullable(handDispatched.getPairs())
-                .map(cards -> new Hand(PAIR, String.valueOf(cards.first())));
+        return handDispatched.getPairs().isEmpty() ? Optional.empty() :
+                Optional.of(new Hand(PAIR, String.valueOf(handDispatched.getPairs().first())));
     }
 }
