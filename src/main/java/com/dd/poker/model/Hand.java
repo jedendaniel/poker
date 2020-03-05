@@ -1,31 +1,24 @@
 package com.dd.poker.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class Hand {
 
-    private HandType handType;
-    private String handValue;
+    private HandType type;
+    private List<Integer> values;
 
-    public Hand() {
+    public Hand(HandType type, Collection<Integer> values) {
+        this.type = type;
+        this.values = new ArrayList<>(values);
     }
 
-    public Hand(HandType handType, String handValue) {
-        this.handType = handType;
-        this.handValue = handValue;
+    public HandType getType() {
+        return type;
     }
 
-    public HandType getHandType() {
-        return handType;
-    }
-
-    public void setHandType(HandType handType) {
-        this.handType = handType;
-    }
-
-    public String getValue() {
-        return handValue;
-    }
-
-    public void setHandValue(String handValue) {
-        this.handValue = handValue;
+    public List<Integer> getValues() {
+        return values;
     }
 }
