@@ -1,33 +1,29 @@
-package com.dd.poker.service;
+package com.dd.poker.service.hand;
 
 import com.dd.poker.model.Card;
 import com.dd.poker.model.Color;
-import com.dd.poker.model.HandDispatched;
+import com.dd.poker.model.DispatchedHand;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class HandDispatcher {
+class HandDispatcher {
 
-    private HandDispatched handDispatched = new HandDispatched();
-
-    public void dispatch(List<Card> cards) {
-        handDispatched.addCardsValues(cards.stream().map(Card::getValue).collect(Collectors.toList()));
-        handDispatched.addPairs(getNCardOfKind(cards, 2));
-        handDispatched.addThrees(getNCardOfKind(cards, 3));
-        handDispatched.setStraightCards(getStraightVariations(cards));
-        handDispatched.setSuitedCards(groupCardsPerColor(cards));
-        handDispatched.addFours(new TreeSet<>(getNCardOfKind(cards, 4)));
+    DispatchedHand getHandPossibilities(DispatchedHand dispatchedHand, List<Card> cards) {
+        List<Integer> cardsValues = cards.stream().flatMap(c -> c.getValues().stream()).collect(Collectors.toList());
+        dispatchedHand.addCardsValues(cardsValues);
+        dispatchedHand.addPairs(getNCardOfKind(cardsValues, 2));
+        dispatchedHand.addThrees(getNCardOfKind(cardsValues, 3));
+        dispatchedHand.setStraightCards(getStraightVariations(cards));
+        dispatchedHand.setSuitedCards(groupCardsPerColor(cards));
+        dispatchedHand.addFours(new TreeSet<>(getNCardOfKind(cardsValues, 4)));
+        return dispatchedHand;
     }
 
-    public HandDispatched getHandDispatched() {
-        return handDispatched;
-    }
-
-    List<Integer> getNCardOfKind(List<Card> cards, int count) {
+    List<Integer> getNCardOfKind(List<Integer> cards, int count) {
         return cards.stream()
-                .map(Card::getValue).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                 .entrySet().stream().filter(e -> e.getValue() == count)
                 .map(Map.Entry::getKey).collect(Collectors.toList());
     }
@@ -49,8 +45,8 @@ public class HandDispatcher {
         otherCards.forEach(other -> {
             List<TreeSet<Card>> newSets = new ArrayList<>();
             result.forEach(variation -> {
-                if (!other.equals(card) && isInLowerStraightRange(card.getValue(), other.getValue()) &&
-                        !variation.stream().map(Card::getValue).collect(Collectors.toList()).contains(other.getValue())) {
+                if (!other.equals(card) && isInLowerStraightRange(card.getValues(), other.getValues()) &&
+                        !variation.stream().map(Card::getValues).collect(Collectors.toList()).contains(other.getValues())) {
                     TreeSet<Card> newSet = new TreeSet<>(variation);
                     newSet.add(other);
                     newSets.add(newSet);
@@ -61,8 +57,9 @@ public class HandDispatcher {
         return result;
     }
 
-    private boolean isInLowerStraightRange(int highValue, int testedValue) {
-        return highValue >= 5 && highValue > testedValue && highValue - testedValue < 5;
+    private boolean isInLowerStraightRange(List<Integer> highValues, List<Integer> testedValues) {
+        return highValues.stream().anyMatch(highValue -> testedValues.stream()
+                .anyMatch(testedValue ->highValue >= 5 && highValue > testedValue && highValue - testedValue < 5));
     }
 
     private List<SortedSet<Card>> filterNotNeededStraightVariations(List<SortedSet<Card>> variations) {

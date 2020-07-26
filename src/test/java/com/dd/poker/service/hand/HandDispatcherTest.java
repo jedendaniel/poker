@@ -1,13 +1,15 @@
-package com.dd.poker.service;
+package com.dd.poker.service.hand;
 
 import com.dd.poker.model.Card;
 import com.dd.poker.model.Color;
+import com.dd.poker.model.DispatchedHand;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static com.dd.poker.model.Color.*;
 import static org.junit.Assert.assertEquals;
@@ -20,10 +22,10 @@ class HandDispatcherTest {
     @Test
     void shouldSortCards() {
         List<Card> cards = List.of(new Card(DIAMONDS, 1), new Card(CLUBS, 14), new Card(SPADES, 7));
-        handDispatcher.dispatch(cards);
-        assertEquals(3, handDispatcher.getHandDispatched().getSortedCardsValues().size());
-        assertEquals(Integer.valueOf(14), handDispatcher.getHandDispatched().getSortedCardsValues().first());
-        assertEquals(Integer.valueOf(1), handDispatcher.getHandDispatched().getSortedCardsValues().last());
+        DispatchedHand dispatchedHand = handDispatcher.getHandPossibilities(new DispatchedHand(), cards);
+        assertEquals(3, dispatchedHand.getSortedCardsValues().size());
+        assertEquals(Integer.valueOf(14), dispatchedHand.getSortedCardsValues().first());
+        assertEquals(Integer.valueOf(1), dispatchedHand.getSortedCardsValues().last());
     }
 
     @Test
@@ -33,9 +35,10 @@ class HandDispatcherTest {
                 new Card(DIAMONDS, 4), new Card(HEARTS, 13), new Card(DIAMONDS, 2),
                 new Card(SPADES, 4), new Card(DIAMONDS, 13),
                 new Card(HEARTS, 4), new Card(HEARTS, 8), new Card(CLUBS, 8));
-        assertEquals(2, handDispatcher.getNCardOfKind(cards, 2).size());
-        assertEquals(1, handDispatcher.getNCardOfKind(cards, 3).size());
-        assertEquals(1, handDispatcher.getNCardOfKind(cards, 4).size());
+        List<Integer> cardsValues = cards.stream().flatMap(c -> c.getValues().stream()).collect(Collectors.toList());
+        assertEquals(2, handDispatcher.getNCardOfKind(cardsValues, 2).size());
+        assertEquals(1, handDispatcher.getNCardOfKind(cardsValues, 3).size());
+        assertEquals(1, handDispatcher.getNCardOfKind(cardsValues, 4).size());
     }
 
     @Test

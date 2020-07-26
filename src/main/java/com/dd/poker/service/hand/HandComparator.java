@@ -1,4 +1,4 @@
-package com.dd.poker.service;
+package com.dd.poker.service.hand;
 
 import com.dd.poker.model.Hand;
 
@@ -6,7 +6,7 @@ import java.security.InvalidParameterException;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 
-public class HandComparator implements Comparator<Hand> {
+class HandComparator implements Comparator<Hand> {
 
     @Override
     public int compare(Hand h1, Hand h2) {

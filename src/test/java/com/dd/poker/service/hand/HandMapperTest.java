@@ -1,7 +1,8 @@
-package com.dd.poker.service;
+package com.dd.poker.service.hand;
 
 
 import com.dd.poker.model.*;
+import com.dd.poker.service.hand.HandMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,144 +17,144 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class HandFactoryTest {
+class HandMapperTest {
 
-    private final HandFactory handFactory;
+    private final HandMapper handMapper;
 
-    private HandDispatched handDispatched;
+    private DispatchedHand dispatchedHand;
 
-    private HandFactoryTest() {
-        handFactory = new HandFactory();
-        handDispatched = mock(HandDispatched.class);
+    private HandMapperTest() {
+        handMapper = new HandMapper();
+        dispatchedHand = mock(DispatchedHand.class);
     }
 
     @BeforeEach
     void setUp() {
         TreeSet<Integer> cards = new TreeSet<>(Collections.reverseOrder());
         cards.addAll(List.of(15, 12, 9, 8, 5, 4));
-        when(handDispatched.getSortedCardsValues()).thenReturn(cards);
-        when(handDispatched.getPairs()).thenReturn(new TreeSet<>());
-        when(handDispatched.getThrees()).thenReturn(new TreeSet<>());
-        when(handDispatched.getStraightCards()).thenReturn(List.of());
-        when(handDispatched.getSuitedCards()).thenReturn(Map.of());
-        when(handDispatched.getFours()).thenReturn(new TreeSet<>());
+        when(dispatchedHand.getSortedCardsValues()).thenReturn(cards);
+        when(dispatchedHand.getPairs()).thenReturn(new TreeSet<>());
+        when(dispatchedHand.getThrees()).thenReturn(new TreeSet<>());
+        when(dispatchedHand.getStraightCards()).thenReturn(List.of());
+        when(dispatchedHand.getSuitedCards()).thenReturn(Map.of());
+        when(dispatchedHand.getFours()).thenReturn(new TreeSet<>());
     }
 
     @Test
-    void getFullHandHighCard() {
-        Hand hand = handFactory.getHand(handDispatched);
+    void shouldGetFullHandHighCard() {
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.HIGHCARD, hand.getType());
         assertEquals(5, hand.getValues().size());
         assertEquals(Integer.valueOf(15), hand.getValues().get(0));
     }
 
     @Test
-    void getTwoCarHighCard() {
+    void shouldGetTwoCarHighCard() {
         TreeSet<Integer> cards = new TreeSet<>(Collections.reverseOrder());
         cards.addAll(List.of(15, 12));
-        when(handDispatched.getSortedCardsValues()).thenReturn(cards);
-        Hand hand = handFactory.getHand(handDispatched);
+        when(dispatchedHand.getSortedCardsValues()).thenReturn(cards);
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.HIGHCARD, hand.getType());
         assertEquals(2, hand.getValues().size());
         assertEquals(Integer.valueOf(15), hand.getValues().get(0));
     }
 
     @Test
-    void getPair() {
-        when(handDispatched.getPairs()).thenReturn(new TreeSet<>(List.of(15)));
-        Hand hand = handFactory.getHand(handDispatched);
+    void shouldGetPair() {
+        when(dispatchedHand.getPairs()).thenReturn(new TreeSet<>(List.of(15)));
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.PAIR, hand.getType());
         assertEquals(4, hand.getValues().size());
-        assertTrue(hand.getValues().containsAll(handDispatched.getPairs()));
+        assertTrue(hand.getValues().containsAll(dispatchedHand.getPairs()));
         assertEquals(Integer.valueOf(15), hand.getValues().get(0));
         assertEquals(Integer.valueOf(12), hand.getValues().get(1));
 
     }
 
     @Test
-    void getTwoPairs() {
+    void shouldGetTwoPairs() {
         TreeSet<Integer> cards = new TreeSet<>(Collections.reverseOrder());
         cards.addAll(List.of(15, 8));
-        when(handDispatched.getPairs()).thenReturn(cards);
-        Hand hand = handFactory.getHand(handDispatched);
+        when(dispatchedHand.getPairs()).thenReturn(cards);
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(3, hand.getValues().size());
-        assertTrue(hand.getValues().containsAll(handDispatched.getPairs()));
+        assertTrue(hand.getValues().containsAll(dispatchedHand.getPairs()));
         assertEquals(Integer.valueOf(15), hand.getValues().get(0));
         assertEquals(Integer.valueOf(8), hand.getValues().get(1));
         assertEquals(Integer.valueOf(12), hand.getValues().get(2));
     }
 
     @Test
-    void getThree() {
-        when(handDispatched.getThrees()).thenReturn(new TreeSet<>(List.of(15)));
-        Hand hand = handFactory.getHand(handDispatched);
+    void shouldGetThree() {
+        when(dispatchedHand.getThrees()).thenReturn(new TreeSet<>(List.of(15)));
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.THREE, hand.getType());
         assertEquals(3, hand.getValues().size());
-        assertTrue(hand.getValues().containsAll(handDispatched.getThrees()));
+        assertTrue(hand.getValues().containsAll(dispatchedHand.getThrees()));
         assertEquals(Integer.valueOf(15), hand.getValues().get(0));
         assertEquals(Integer.valueOf(12), hand.getValues().get(1));
         assertEquals(Integer.valueOf(9), hand.getValues().get(2));
     }
 
     @Test
-    void getStraight() {
-        when(handDispatched.getStraightCards()).thenReturn(List.of(new TreeSet<>(List.of(
+    void shouldGetStraight() {
+        when(dispatchedHand.getStraightCards()).thenReturn(List.of(new TreeSet<>(List.of(
                 new Card(DIAMONDS, 12), new Card(SPADES, 11), new Card(DIAMONDS, 10), new Card(CLUBS, 9), new Card(DIAMONDS, 8)))));
-        Hand hand = handFactory.getHand(handDispatched);
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.STRAIGHT, hand.getType());
         assertEquals(1, hand.getValues().size());
         assertEquals(Integer.valueOf(12), hand.getValues().get(0));
     }
 
     @Test
-    void getFlush() {
-        when(handDispatched.getSuitedCards()).thenReturn(Map.of(DIAMONDS, new TreeSet<>(List.of(
+    void shouldGetFlush() {
+        when(dispatchedHand.getSuitedCards()).thenReturn(Map.of(DIAMONDS, new TreeSet<>(List.of(
                 new Card(DIAMONDS, 14), new Card(DIAMONDS, 11), new Card(DIAMONDS, 10), new Card(DIAMONDS, 9), new Card(DIAMONDS, 4)))));
-        Hand hand = handFactory.getHand(handDispatched);
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.FLUSH, hand.getType());
         assertEquals(5, hand.getValues().size());
         assertEquals(Integer.valueOf(14), hand.getValues().get(0));
     }
 
     @Test
-    void getFullHouse() {
-        when(handDispatched.getPairs()).thenReturn(new TreeSet<>(List.of(8)));
-        when(handDispatched.getThrees()).thenReturn(new TreeSet<>(List.of(3)));
-        Hand hand = handFactory.getHand(handDispatched);
+    void shouldGetFullHouse() {
+        when(dispatchedHand.getPairs()).thenReturn(new TreeSet<>(List.of(8)));
+        when(dispatchedHand.getThrees()).thenReturn(new TreeSet<>(List.of(3)));
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.FULL_HOUSE, hand.getType());
         assertEquals(2, hand.getValues().size());
-        assertTrue(hand.getValues().containsAll(handDispatched.getThrees()));
-        assertTrue(hand.getValues().containsAll(handDispatched.getPairs()));
+        assertTrue(hand.getValues().containsAll(dispatchedHand.getThrees()));
+        assertTrue(hand.getValues().containsAll(dispatchedHand.getPairs()));
         assertEquals(Integer.valueOf(3), hand.getValues().get(0));
         assertEquals(Integer.valueOf(8), hand.getValues().get(1));
     }
 
     @Test
-    void getFour() {
-        when(handDispatched.getFours()).thenReturn(new TreeSet<>(List.of(15)));
-        Hand hand = handFactory.getHand(handDispatched);
+    void shouldGetFour() {
+        when(dispatchedHand.getFours()).thenReturn(new TreeSet<>(List.of(15)));
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.FOUR, hand.getType());
         assertEquals(2, hand.getValues().size());
-        assertTrue(hand.getValues().containsAll(handDispatched.getFours()));
+        assertTrue(hand.getValues().containsAll(dispatchedHand.getFours()));
         assertEquals(Integer.valueOf(15), hand.getValues().get(0));
         assertEquals(Integer.valueOf(12), hand.getValues().get(1));
     }
 
     @Test
-    void getStraightFlush() {
-        when(handDispatched.getStraightCards()).thenReturn(List.of(new TreeSet<>(List.of(
+    void shouldGetStraightFlush() {
+        when(dispatchedHand.getStraightCards()).thenReturn(List.of(new TreeSet<>(List.of(
                 new Card(DIAMONDS, 12), new Card(DIAMONDS, 11), new Card(DIAMONDS, 10), new Card(DIAMONDS, 9), new Card(DIAMONDS, 8)))));
-        Hand hand = handFactory.getHand(handDispatched);
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.STRAIGHT_FLUSH, hand.getType());
         assertEquals(1, hand.getValues().size());
         assertEquals(Integer.valueOf(12), hand.getValues().get(0));
     }
 
     @Test
-    void getRoyalFlush() {
-        when(handDispatched.getStraightCards()).thenReturn(List.of(new TreeSet<>(List.of(
+    void shouldGetRoyalFlush() {
+        when(dispatchedHand.getStraightCards()).thenReturn(List.of(new TreeSet<>(List.of(
                 new Card(DIAMONDS, 15), new Card(DIAMONDS, 14), new Card(DIAMONDS, 13), new Card(DIAMONDS, 12), new Card(DIAMONDS, 11)))));
-        Hand hand = handFactory.getHand(handDispatched);
+        Hand hand = handMapper.getHand(dispatchedHand);
         assertEquals(HandType.ROYAL_FLUSH, hand.getType());
     }
 }

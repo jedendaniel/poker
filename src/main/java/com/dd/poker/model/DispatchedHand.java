@@ -2,7 +2,7 @@ package com.dd.poker.model;
 
 import java.util.*;
 
-public class HandDispatched {
+public class DispatchedHand {
 
     private SortedSet<Integer> sortedCardsValues = new TreeSet<>(Collections.reverseOrder());
     private SortedSet<Integer> pairs = new TreeSet<>(Collections.reverseOrder());
